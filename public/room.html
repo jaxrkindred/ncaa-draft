@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NCAA Draft — Room</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="room-page">
+
+  <!-- ── LOBBY ─────────────────────────────────────────────────────── -->
+  <div id="view-lobby" class="view hidden">
+    <div class="lobby-container">
+      <div class="room-header">
+        <a href="/" class="back-link">← Home</a>
+        <h1>🏀 NCAA Draft</h1>
+      </div>
+
+      <div class="room-code-box">
+        <p class="label">Room Code</p>
+        <div class="code" id="lobby-room-code"></div>
+        <button class="btn btn-sm" onclick="copyLink()">Copy Invite Link</button>
+        <span id="copy-confirm" class="copy-confirm hidden">Copied!</span>
+      </div>
+
+      <div class="lobby-players">
+        <div class="lobby-players-header">
+          <h2>Players</h2>
+          <div id="lobby-fill-status"></div>
+        </div>
+        <ul id="lobby-player-list"></ul>
+      </div>
+
+      <div id="host-controls" class="hidden">
+        <div class="room-size-row">
+          <span class="room-size-label">Room size</span>
+          <div class="stepper">
+            <button type="button" id="lobby-size-dec">−</button>
+            <span id="lobby-size-display">8</span>
+            <button type="button" id="lobby-size-inc">+</button>
+          </div>
+          <span class="room-size-hint">Can't start until full</span>
+        </div>
+        <button class="btn btn-primary btn-large" id="start-btn" disabled>Start Draft</button>
+      </div>
+      <div id="waiting-msg" class="hint hidden">Waiting for the host to start the draft…</div>
+    </div>
+  </div>
+
+  <!-- ── DRAFT ─────────────────────────────────────────────────────── -->
+  <div id="view-draft" class="view hidden">
+    <div class="draft-layout">
+
+      <!-- Left: pick panel -->
+      <div class="draft-left">
+        <div class="draft-header">
+          <div class="room-code-small">Room: <strong id="draft-room-code"></strong></div>
+          <div class="draft-progress" id="draft-progress"></div>
+        </div>
+
+        <div id="your-turn-panel" class="hidden">
+          <h2 class="turn-heading">Your pick!</h2>
+          <p class="turn-sub">Choose one — the other two go back in the pool.</p>
+          <div id="team-options" class="team-options"></div>
+        </div>
+
+        <div id="waiting-turn-panel" class="hidden">
+          <div class="waiting-turn-inner">
+            <div class="spinner"></div>
+            <h2 id="waiting-turn-name">Waiting for …</h2>
+            <p>to make their pick</p>
+          </div>
+        </div>
+
+        <details class="draft-board-details">
+          <summary>Draft board</summary>
+          <div id="draft-board"></div>
+        </details>
+      </div>
+
+      <!-- Right: bracket -->
+      <div class="draft-right">
+        <div class="bracket-toolbar">
+          <div class="region-tabs">
+            <button class="region-tab active" data-region="East">East</button>
+            <button class="region-tab" data-region="West">West</button>
+            <button class="region-tab" data-region="Midwest">Midwest</button>
+            <button class="region-tab" data-region="South">South</button>
+          </div>
+          <div id="player-legend" class="player-legend"></div>
+        </div>
+        <div id="bracket-wrapper" class="bracket-wrapper">
+          <div id="bracket-inner" class="bracket-inner">
+            <div id="bracket-svg-container"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TOURNAMENT ─────────────────────────────────────────────────── -->
+  <div id="view-tournament" class="view hidden">
+    <div class="tournament-container">
+      <div class="tournament-header">
+        <a href="/" class="back-link">← Home</a>
+        <h1>🏀 March Madness Tracker</h1>
+        <div class="room-code-small">Room: <strong id="tourn-room-code"></strong></div>
+        <div class="poll-indicator" id="poll-indicator">Live updates on</div>
+      </div>
+
+      <div id="tournament-winner-banner" class="winner-banner hidden"></div>
+
+      <div id="leaderboard"></div>
+
+      <details class="eliminated-section">
+        <summary>Eliminated Teams</summary>
+        <div id="eliminated-list"></div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ── ERROR / LOADING ───────────────────────────────────────────── -->
+  <div id="view-loading" class="view loading-screen">
+    <div class="spinner large"></div>
+    <p>Connecting…</p>
+  </div>
+
+  <div id="view-error" class="view hidden error-screen">
+    <h2>Something went wrong</h2>
+    <p id="error-detail"></p>
+    <a href="/" class="btn btn-primary">Go Home</a>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/teams-data.js"></script>
+  <script src="/bracket.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

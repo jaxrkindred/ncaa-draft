@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NCAA Draft</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="home-page">
+  <div class="home-container">
+    <div class="logo">
+      <div class="logo-icon">🏀</div>
+      <h1>NCAA Draft</h1>
+      <p class="tagline">A live team draft for March Madness — last team standing wins.</p>
+    </div>
+
+    <div class="home-cards">
+      <div class="card">
+        <h2>Create a Room</h2>
+        <p>Start a new draft for your group. Share the code when everyone's ready.</p>
+        <form id="create-form">
+          <input type="text" id="create-name" placeholder="Your name" maxlength="30" required />
+          <div class="player-count-row">
+            <label for="create-size">Number of players</label>
+            <div class="stepper">
+              <button type="button" id="size-dec">−</button>
+              <span id="size-display">8</span>
+              <button type="button" id="size-inc">+</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Create Room</button>
+        </form>
+      </div>
+
+      <div class="divider">or</div>
+
+      <div class="card">
+        <h2>Join a Room</h2>
+        <p>Got a room code? Enter it below to join an existing draft.</p>
+        <form id="join-form">
+          <input type="text" id="join-name" placeholder="Your name" maxlength="30" required />
+          <input type="text" id="join-code" placeholder="Room code (e.g. A3F9C2)" maxlength="6" style="text-transform:uppercase" required />
+          <button type="submit" class="btn btn-secondary">Join Room</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="error-msg" class="error-banner hidden"></div>
+    <div id="return-banner" class="return-banner hidden">
+      You have an active room. <a id="return-link" href="#">Return to it →</a>
+      <button id="return-clear" title="Leave room">✕</button>
+    </div>
+
+    <div class="how-it-works">
+      <h3>How it works</h3>
+      <ol>
+        <li>Everyone joins a room and the host starts the draft.</li>
+        <li>On your turn, 3 random teams are shown — pick 1. The other 2 go back into the pool.</li>
+        <li>Round robin continues until all 68 teams are claimed.</li>
+        <li>As the tournament plays out, eliminated teams are tracked automatically.</li>
+        <li><strong>Last team standing wins the hoodie.</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const errorMsg = document.getElementById('error-msg');
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.remove('hidden');
+      setTimeout(() => errorMsg.classList.add('hidden'), 4000);
+    }
+
+    // ── Player count stepper ──────────────────────────────────────────────
+    let roomSize = 8;
+    const MIN = 2, MAX = 20;
+    function updateSizeDisplay() {
+      document.getElementById('size-display').textContent = roomSize;
+      document.getElementById('size-dec').disabled = roomSize <= MIN;
+      document.getElementById('size-inc').disabled = roomSize >= MAX;
+    }
+    document.getElementById('size-dec').addEventListener('click', () => { if (roomSize > MIN) { roomSize--; updateSizeDisplay(); } });
+    document.getElementById('size-inc').addEventListener('click', () => { if (roomSize < MAX) { roomSize++; updateSizeDisplay(); } });
+    updateSizeDisplay();
+
+    document.getElementById('create-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('create-name').value.trim();
+      if (!name) return showError('Please enter your name.');
+      socket.emit('create-room', { playerName: name, expectedPlayers: roomSize }, (res) => {
+        if (res.error) return showError(res.error);
+        localStorage.setItem('playerId', res.playerId);
+        localStorage.setItem('roomId', res.roomId);
+        window.location.href = `/room/${res.roomId}`;
+      });
+    });
+
+    document.getElementById('join-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('join-name').value.trim();
+      const code = document.getElementById('join-code').value.trim().toUpperCase();
+      if (!name) return showError('Please enter your name.');
+      if (!code) return showError('Please enter a room code.');
+      socket.emit('join-room', { roomId: code, playerName: name }, (res) => {
+        if (res.error) return showError(res.error);
+        localStorage.setItem('playerId', res.playerId);
+        localStorage.setItem('roomId', code);
+        window.location.href = `/room/${code}`;
+      });
+    });
+
+    document.getElementById('join-code').addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+
+    // ── Return banner for players with a saved room ───────────────────────
+    const savedRoom = localStorage.getItem('roomId');
+    if (savedRoom) {
+      const banner = document.getElementById('return-banner');
+      document.getElementById('return-link').href = `/room/${savedRoom}`;
+      banner.classList.remove('hidden');
+      document.getElementById('return-clear').addEventListener('click', () => {
+        localStorage.removeItem('roomId');
+        localStorage.removeItem('playerId');
+        banner.classList.add('hidden');
+      });
+    }
+  </script>
+</body>
+</html>
