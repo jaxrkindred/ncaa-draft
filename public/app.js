@@ -159,6 +159,7 @@ function renderDraft(room) {
       cp ? escHtml(cp.name) : 'Someone';
   }
 
+  renderTurnOrder(room);
   renderDraftBoard(room);
   renderPlayerLegend(room);
   renderBracketPanel(room);
@@ -269,6 +270,41 @@ function stopCountdown() {
   if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
   const el = document.getElementById('draft-timer');
   if (el) { el.textContent = ''; el.className = 'draft-timer'; }
+}
+
+function renderTurnOrder(room) {
+  const el = document.getElementById('turn-order');
+  if (!el || !room.draftOrder.length) return;
+
+  const playerMap = Object.fromEntries(room.players.map(p => [p.id, p]));
+  const n = room.draftOrder.length;
+  const pos = room.draftPosition;
+
+  // Show one full cycle starting from current pick
+  const items = room.draftOrder.map((pid, i) => {
+    const offset = (i - (pos % n) + n) % n;
+    return { pid, offset };
+  }).sort((a, b) => a.offset - b.offset);
+
+  el.innerHTML = `
+    <div class="turn-order-label">Turn order</div>
+    <div class="turn-order-list">
+      ${items.map(({ pid, offset }) => {
+        const p = playerMap[pid];
+        if (!p) return '';
+        const isNow = offset === 0;
+        const isMe = pid === myPlayerId;
+        const label = isNow ? 'now' : `+${offset}`;
+        return `
+          <div class="turn-chip ${isNow ? 'turn-now' : ''} ${isMe ? 'turn-me' : ''}">
+            <span class="turn-chip-dot" style="background:${escHtml(p.color)}"></span>
+            <span class="turn-chip-name">${escHtml(p.name)}</span>
+            <span class="turn-chip-offset">${label}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
 function renderDraftBoard(room) {

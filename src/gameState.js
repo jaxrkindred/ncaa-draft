@@ -228,6 +228,7 @@ function serializeRoom(room) {
     eliminatedTeamIds: [...elimIds],
     resolvedSlots: room.resolvedSlots,
     draftOrder: room.draftOrder,
+    draftPosition: room.draftPosition,
     turnStartedAt: room.turnStartedAt || null,
   };
 }

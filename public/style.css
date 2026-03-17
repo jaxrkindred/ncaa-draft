@@ -348,6 +348,62 @@ input[type="text"]:focus { outline: 2px solid var(--accent2); border-color: tran
 }
 .waiting-turn-inner h2 { font-size: 1.3rem; color: var(--text); }
 
+/* Turn order */
+.turn-order { margin-bottom: 0.75rem; }
+.turn-order-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+.turn-order-list {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+.turn-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: border-color 0.15s;
+}
+.turn-chip.turn-now {
+  border-color: var(--green);
+  background: rgba(63, 185, 80, 0.1);
+  color: var(--text);
+  font-weight: 600;
+}
+.turn-chip.turn-me {
+  border-color: var(--accent2);
+}
+.turn-chip.turn-now.turn-me {
+  border-color: var(--green);
+  box-shadow: 0 0 0 1px var(--green);
+}
+.turn-chip-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.turn-chip-name { max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
+.turn-chip-offset {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.turn-chip.turn-now .turn-chip-offset { color: var(--green); }
+
 /* Draft board collapsible */
 .draft-board-details {
   border: 1px solid var(--border);
