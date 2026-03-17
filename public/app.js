@@ -43,6 +43,7 @@ socket.on('room-updated', (room) => {
 });
 
 socket.on('draft-complete', (room) => {
+  stopCountdown();
   currentRoom = room;
   renderRoom(room);
 });
@@ -119,6 +120,8 @@ let bracketPanInitialized = false;
 let mobilePanelInitialized = false;
 let currentRegion = 'East';
 let currentMobilePanel = 'pick';
+let countdownInterval = null;
+const TURN_SECONDS = 60;
 
 // ── DRAFT ─────────────────────────────────────────────────────────────────
 function renderDraft(room) {
@@ -148,7 +151,9 @@ function renderDraft(room) {
 
   if (isMyTurn) {
     renderTeamOptions(room.currentOptions);
+    startCountdown(room.turnStartedAt);
   } else {
+    stopCountdown();
     const cp = room.players.find(p => p.id === room.currentPlayerId);
     document.getElementById('waiting-turn-name').textContent =
       cp ? escHtml(cp.name) : 'Someone';
@@ -245,6 +250,25 @@ function pickTeam(teamId) {
       document.querySelectorAll('.team-card').forEach(b => b.disabled = false);
     }
   });
+}
+
+function startCountdown(turnStartedAt) {
+  stopCountdown();
+  const el = document.getElementById('draft-timer');
+  if (!el || !turnStartedAt) return;
+  function tick() {
+    const remaining = Math.max(0, TURN_SECONDS - Math.floor((Date.now() - turnStartedAt) / 1000));
+    el.textContent = remaining + 's';
+    el.className = 'draft-timer' + (remaining <= 10 ? ' timer-warning' : '');
+  }
+  tick();
+  countdownInterval = setInterval(tick, 500);
+}
+
+function stopCountdown() {
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+  const el = document.getElementById('draft-timer');
+  if (el) { el.textContent = ''; el.className = 'draft-timer'; }
 }
 
 function renderDraftBoard(room) {

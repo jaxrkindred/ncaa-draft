@@ -30,6 +30,37 @@ app.get('/teams-data.js', (req, res) => {
   res.send(`window.ALL_TEAMS = ${JSON.stringify(teams)};`);
 });
 
+// ── Autodraft timer ───────────────────────────────────────────────────────
+
+const TURN_SECONDS = 60;
+const draftTimers = new Map();
+
+function clearDraftTimer(roomId) {
+  const t = draftTimers.get(roomId);
+  if (t) { clearTimeout(t); draftTimers.delete(roomId); }
+}
+
+function startDraftTimer(roomId) {
+  clearDraftTimer(roomId);
+  const t = setTimeout(() => {
+    const room = getAllRooms().get(roomId);
+    if (!room || room.status !== 'drafting' || !room.currentOptions.length) return;
+    const currentPlayerId = room.draftOrder[room.draftPosition % room.draftOrder.length];
+    const randomTeam = room.currentOptions[Math.floor(Math.random() * room.currentOptions.length)];
+    const result = pickTeam(roomId, currentPlayerId, randomTeam.id);
+    if (!result.error) {
+      const updatedRoom = getPublicRoom(roomId);
+      io.to(roomId).emit('room-updated', updatedRoom);
+      if (result.draftComplete) {
+        io.to(roomId).emit('draft-complete', updatedRoom);
+      } else {
+        startDraftTimer(roomId);
+      }
+    }
+  }, TURN_SECONDS * 1000);
+  draftTimers.set(roomId, t);
+}
+
 // ── Socket.io ─────────────────────────────────────────────────────────────
 
 io.on('connection', (socket) => {
@@ -82,16 +113,22 @@ io.on('connection', (socket) => {
     const result = startDraft(roomId, playerId);
     if (result.error) return cb(result);
     io.to(roomId).emit('room-updated', getPublicRoom(roomId));
+    startDraftTimer(roomId);
     cb({ ok: true });
   });
 
   socket.on('pick-team', ({ roomId, playerId, teamId }, cb) => {
+    clearDraftTimer(roomId);
     const result = pickTeam(roomId, playerId, teamId);
     if (result.error) return cb(result);
 
     const updatedRoom = getPublicRoom(roomId);
     io.to(roomId).emit('room-updated', updatedRoom);
-    if (result.draftComplete) io.to(roomId).emit('draft-complete', updatedRoom);
+    if (result.draftComplete) {
+      io.to(roomId).emit('draft-complete', updatedRoom);
+    } else {
+      startDraftTimer(roomId);
+    }
     cb({ ok: true });
   });
 

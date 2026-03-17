@@ -269,8 +269,19 @@ input[type="text"]:focus { outline: 2px solid var(--accent2); border-color: tran
 .draft-progress { display: flex; align-items: center; font-size: 0.8rem; color: var(--text-muted); }
 
 /* Your turn */
-.turn-heading { font-size: 1.3rem; margin-bottom: 0.2rem; }
+.turn-heading-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem; }
+.turn-heading { font-size: 1.3rem; }
 .turn-sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.8rem; }
+.draft-timer {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  min-width: 3rem;
+  text-align: right;
+  transition: color 0.3s;
+}
+.draft-timer.timer-warning { color: var(--accent); }
 
 .team-options {
   display: grid;

@@ -132,8 +132,10 @@ function pickTeam(roomId, playerId, teamId) {
 }
 
 function advanceDraft(room) {
+  shuffle(room.pool); // always fresh random draw for each turn
   const count = Math.min(3, room.pool.length);
   room.currentOptions = room.pool.splice(room.pool.length - count, count);
+  room.turnStartedAt = Date.now();
 }
 
 // Called when a First Four play-in game is resolved
@@ -226,6 +228,7 @@ function serializeRoom(room) {
     eliminatedTeamIds: [...elimIds],
     resolvedSlots: room.resolvedSlots,
     draftOrder: room.draftOrder,
+    turnStartedAt: room.turnStartedAt || null,
   };
 }
 
