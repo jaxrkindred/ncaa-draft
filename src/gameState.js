@@ -1,7 +1,21 @@
 const crypto = require('crypto');
 const ALL_TEAMS = require('./teams');
+const db = require('./db');
 
 const rooms = new Map();
+
+// Load persisted rooms from DB on startup
+try {
+  const persisted = db.loadAllRooms();
+  for (const room of persisted) {
+    rooms.set(room.id, room);
+  }
+  if (persisted.length > 0) {
+    console.log(`[db] Loaded ${persisted.length} room(s) from database`);
+  }
+} catch (err) {
+  console.error('[db] Failed to load rooms:', err.message);
+}
 
 const PLAYER_COLORS = [
   '#f78166', // coral
@@ -42,6 +56,7 @@ function createRoom(hostSocketId, hostName, expectedPlayers = 8) {
     createdAt: Date.now(),
   };
   rooms.set(roomId, room);
+  db.saveRoom(room);
   return { roomId, playerId: hostId };
 }
 
@@ -54,6 +69,7 @@ function joinRoom(roomId, socketId, playerName) {
   const playerId = crypto.randomUUID();
   const color = PLAYER_COLORS[room.players.length % PLAYER_COLORS.length];
   room.players.push({ id: playerId, socketId, name: playerName, teams: [], connected: true, color });
+  db.saveRoom(room);
   return { playerId };
 }
 
@@ -81,6 +97,7 @@ function startDraft(roomId, requestingPlayerId) {
   room.draftPosition = 0;
   room.pool = shuffle([...room.pool]);
   advanceDraft(room);
+  db.saveRoom(room);
   return { ok: true };
 }
 
@@ -105,10 +122,12 @@ function pickTeam(roomId, playerId, teamId) {
 
   if (room.pool.length === 0) {
     room.status = 'tournament';
+    db.saveRoom(room);
     return { ok: true, draftComplete: true };
   }
 
   advanceDraft(room);
+  db.saveRoom(room);
   return { ok: true, draftComplete: false };
 }
 
@@ -130,6 +149,7 @@ function resolveSlotAllRooms(slotId, winner) {
   for (const room of rooms.values()) {
     if (!room.resolvedSlots[slotId]) {
       room.resolvedSlots[slotId] = winner;
+      db.saveRoom(room);
     }
   }
 }
@@ -138,6 +158,7 @@ function markTeamEliminated(teamId) {
   for (const room of rooms.values()) {
     if (room.status === 'tournament') {
       room.eliminatedTeamIds.add(teamId);
+      db.saveRoom(room);
     }
   }
 }
@@ -243,4 +264,5 @@ module.exports = {
   createRoom, joinRoom, setRoomSize, startDraft, pickTeam,
   resolveSlotAllRooms, markTeamEliminated, markTeamsEliminatedAllRooms,
   getPublicRoom, getAllRooms, markDisconnected, getRoomBySocketId, serializeRoom,
+  saveRoom: (roomId) => { const r = getAllRooms().get(roomId); if (r) db.saveRoom(r); },
 };

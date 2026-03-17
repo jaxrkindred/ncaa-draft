@@ -479,9 +479,113 @@ input[type="text"]:focus { outline: 2px solid var(--accent2); border-color: tran
   50%       { stroke-opacity: 0.4; }
 }
 
-@media (max-width: 800px) {
-  .draft-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; }
-  .draft-right { height: 60vw; min-height: 300px; }
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* MOBILE (< 768px)                                                        */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+/* Mobile panel tabs (hidden on desktop) */
+.mobile-tabs { display: none; }
+
+@media (max-width: 768px) {
+  /* ── Home ── */
+  .home-page { padding: 1.5rem 1rem 3rem; }
+  .logo h1 { font-size: 1.8rem; }
+  .logo-icon { font-size: 2.2rem; }
+  .home-cards { grid-template-columns: 1fr; gap: 0.75rem; }
+  .divider { padding: 0; }
+  .how-it-works { padding: 1rem; }
+
+  /* ── Lobby ── */
+  .lobby-container { padding: 1rem; }
+  .room-code-box .code { font-size: 2rem; }
+  .room-size-row { flex-wrap: wrap; }
+
+  /* ── Draft: full mobile rethink ── */
+  .mobile-tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .mobile-tab {
+    flex: 1;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .mobile-tab.active {
+    color: var(--accent2);
+    border-bottom-color: var(--accent2);
+  }
+
+  .draft-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    grid-template-columns: none;
+  }
+
+  /* Only show the active panel */
+  .draft-layout[data-panel="pick"] .draft-left  { display: flex; }
+  .draft-layout[data-panel="pick"] .draft-right { display: none; }
+  .draft-layout[data-panel="bracket"] .draft-left  { display: none; }
+  .draft-layout[data-panel="bracket"] .draft-right { display: flex; }
+
+  .draft-left {
+    flex: 1;
+    border-right: none;
+    overflow-y: auto;
+  }
+
+  .draft-right {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Bigger team cards for touch */
+  .team-card {
+    padding: 1rem 1.1rem;
+  }
+  .team-name { font-size: 1.05rem; }
+  .seed-badge { width: 34px; height: 34px; font-size: 1rem; }
+
+  /* Draft header compact */
+  .draft-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Bracket toolbar stacks */
+  .bracket-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+  }
+  .player-legend { flex-wrap: wrap; gap: 0.4rem; }
+
+  /* ── Tournament ── */
+  .tournament-container { padding: 1rem 0.75rem 3rem; }
+  .tournament-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .tournament-header h1 { font-size: 1.2rem; }
+  .player-card-header { flex-wrap: wrap; gap: 0.5rem; }
+  .player-teams { padding: 0.6rem 0.9rem; }
+  .team-pill { font-size: 0.75rem; }
+}
+
+@media (max-width: 400px) {
+  .region-tabs { gap: 0.15rem; }
+  .region-tab { padding: 0.28rem 0.5rem; font-size: 0.72rem; }
+  .room-code-box .code { font-size: 1.6rem; letter-spacing: 0.08em; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════ */

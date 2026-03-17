@@ -7,6 +7,7 @@ const {
   createRoom, joinRoom, setRoomSize, startDraft, pickTeam,
   resolveSlotAllRooms, markTeamsEliminatedAllRooms,
   getPublicRoom, getAllRooms, markDisconnected, getRoomBySocketId, serializeRoom,
+  saveRoom,
 } = require('./src/gameState');
 
 const { fetchTournamentUpdates } = require('./src/ncaaApi');
@@ -63,6 +64,7 @@ io.on('connection', (socket) => {
 
     player.socketId = socket.id;
     player.connected = true;
+    saveRoom(roomId);
     socket.join(roomId);
     io.to(roomId).emit('room-updated', getPublicRoom(roomId));
     cb({ room: getPublicRoom(roomId) });
@@ -71,6 +73,7 @@ io.on('connection', (socket) => {
   socket.on('set-room-size', ({ roomId, playerId, size }, cb) => {
     const result = setRoomSize(roomId, playerId, size);
     if (result.error) return cb(result);
+    saveRoom(roomId);
     io.to(roomId).emit('room-updated', getPublicRoom(roomId));
     cb({ ok: true });
   });

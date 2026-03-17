@@ -116,7 +116,9 @@ function setLobbySize(room, size) {
 }
 
 let bracketPanInitialized = false;
+let mobilePanelInitialized = false;
 let currentRegion = 'East';
+let currentMobilePanel = 'pick';
 
 // ── DRAFT ─────────────────────────────────────────────────────────────────
 function renderDraft(room) {
@@ -135,6 +137,15 @@ function renderDraft(room) {
   document.getElementById('your-turn-panel').classList.toggle('hidden', !isMyTurn);
   document.getElementById('waiting-turn-panel').classList.toggle('hidden', isMyTurn);
 
+  if (isMyTurn && window.innerWidth < 768) {
+    currentMobilePanel = 'pick';
+    document.querySelectorAll('.mobile-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.panel === 'pick');
+    });
+    const layout = document.querySelector('.draft-layout');
+    if (layout) layout.dataset.panel = 'pick';
+  }
+
   if (isMyTurn) {
     renderTeamOptions(room.currentOptions);
   } else {
@@ -151,6 +162,11 @@ function renderDraft(room) {
     initRegionTabs(room);
     window.initBracketPan('bracket-wrapper', 'bracket-inner');
     bracketPanInitialized = true;
+  }
+
+  if (!mobilePanelInitialized) {
+    initMobileTabs();
+    mobilePanelInitialized = true;
   }
 }
 
@@ -173,6 +189,18 @@ function initRegionTabs(room) {
       const inner = document.getElementById('bracket-inner');
       if (inner) inner.style.transform = 'translate(0,0)';
       renderBracketPanel(currentRoom);
+    });
+  });
+}
+
+function initMobileTabs() {
+  document.querySelectorAll('.mobile-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mobile-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMobilePanel = btn.dataset.panel;
+      const layout = document.querySelector('.draft-layout');
+      if (layout) layout.dataset.panel = currentMobilePanel;
     });
   });
 }
