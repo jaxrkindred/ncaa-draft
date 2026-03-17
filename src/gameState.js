@@ -133,7 +133,7 @@ function pickTeam(roomId, playerId, teamId) {
 
 function advanceDraft(room) {
   shuffle(room.pool); // always fresh random draw for each turn
-  const count = Math.min(3, room.pool.length);
+  const count = Math.min(2, room.pool.length);
   room.currentOptions = room.pool.splice(room.pool.length - count, count);
   room.turnStartedAt = Date.now();
 }
